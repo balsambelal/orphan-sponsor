@@ -3,7 +3,7 @@
 @section('content')
 <div class="container">
     <h2>لوحة تحكم الكفيل: {{ auth()->guard('sponsor')->user()->name }}</h2>
-    <form method="POST" action="{{ route('orphans.logout') }}">
+    <form method="POST" action="{{ route('sponsor.logout') }}">
     @csrf
     <button type="submit" class="btn btn-danger">تسجيل خروج</button>
 </form>

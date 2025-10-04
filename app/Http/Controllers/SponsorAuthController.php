@@ -7,13 +7,13 @@ use Illuminate\Support\Facades\Auth;
 
 class SponsorAuthController extends Controller
 {
-    // 1️⃣ عرض صفحة تسجيل الدخول للكفيل
+    //  عرض صفحة تسجيل الدخول للكفيل
     public function showLogin()
     {
         return view('sponsors.login'); // تأكد من وجود هذا view
     }
 
-    // 2️⃣ تسجيل الدخول
+    //  تسجيل الدخول
     public function login(Request $request)
     {
         $credentials = $request->validate([
@@ -31,7 +31,7 @@ class SponsorAuthController extends Controller
         ]);
     }
 
-    // 3️⃣ تسجيل الخروج
+    //  تسجيل الخروج
     public function logout(Request $request)
     {
         Auth::guard('sponsor')->logout(); // خروج الكفيل
