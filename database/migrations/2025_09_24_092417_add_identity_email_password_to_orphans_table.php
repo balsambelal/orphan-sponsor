@@ -6,13 +6,19 @@ use Illuminate\Support\Facades\Schema;
 
 class AddIdentityEmailPasswordToOrphansTable extends Migration
 {
+
 public function up()
 {
     Schema::table('orphans', function (Blueprint $table) {
-        $table->string('identity_number')->nullable()->after('name');
-        $table->string('email')->nullable()->after('identity_number');
+        if (!Schema::hasColumn('orphans', 'identity_number')) {
+            $table->string('identity_number')->nullable()->after('name');
+        }
+        if (!Schema::hasColumn('orphans', 'email')) {
+            $table->string('email')->nullable()->after('identity_number');
+        }
     });
 }
+
 
 
 public function down()

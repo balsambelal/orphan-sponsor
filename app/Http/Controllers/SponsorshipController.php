@@ -18,43 +18,61 @@ public function index()
     return view('sponsorships.index', compact('sponsorships'));
 }
 
-public function createSponsorship($id)
+public function createSponsorship($orphanId)
 {
-    $orphan = Orphan::findOrFail($id);
+    $orphan = Orphan::findOrFail($orphanId);
+    $currentSponsor = auth()->guard('sponsor')->user();
+
+    // تحقق هل الطفل مكفول من نفس الكفيل
+    $alreadySponsoredByCurrent = $orphan->sponsors()->where('sponsor_id', $currentSponsor->id)->exists();
+
+    if ($alreadySponsoredByCurrent) {
+        return redirect()->route('sponsor.dashboard')
+                         ->with('error', 'لقد كفلت هذا اليتيم بالفعل.');
+    }
+
+    // السماح بالكفالة حتى لو الطفل مكفول من كفيل آخر
     return view('sponsorships.create', compact('orphan'));
 }
 
-    public function create(Orphan $orphan)
-    {
-        return view('sponsorships.create', compact('orphan'));
+
+public function store(Request $request)
+{
+    $data = $request->validate([
+        'orphan_id'  => 'required|exists:orphans,id',
+        'amount'     => 'required|numeric|min:0',
+        'account_no' => 'required|string|max:255',
+        'start_date' => 'required|date',
+        'end_date'   => 'nullable|date|after_or_equal:start_date',
+    ]);
+
+    $orphan = Orphan::findOrFail($data['orphan_id']);
+    $sponsorId = auth()->guard('sponsor')->id();
+
+    // تحقق إذا الكفيل نفسه حاول كفالة الطفل مسبقًا
+    if ($orphan->sponsorships()->where('sponsor_id', $sponsorId)->exists()) {
+        return redirect()->back()->with('error', 'لقد قمت بكفالة هذا الطفل مسبقًا.');
     }
 
-    public function store(Request $request)
-    {
-        $data = $request->validate([
-            'orphan_id'  => 'required|exists:orphans,id',
-            'amount'     => 'required|numeric|min:0',
-            'account_no' => 'required|string|max:255',
-            'start_date' => 'required|date',
-            'end_date'   => 'nullable|date|after_or_equal:start_date',
-        ]);
+    // إنشاء الكفالة الجديدة، حتى لو كان الطفل مكفول من كفيل آخر
+    Sponsorship::create([
+        'orphan_id'  => $orphan->id,
+        'sponsor_id' => $sponsorId,
+        'amount'     => $data['amount'],
+        'account_no' => $data['account_no'],
+        'start_date' => $data['start_date'],
+        'end_date'   => $data['end_date'] ?? null,
+        'status'     => 'active',
+    ]);
 
-        Sponsorship::create([
-            'orphan_id'  => $data['orphan_id'],
-            'sponsor_id' => auth()->guard('sponsor')->id(),
-            'amount'     => $data['amount'],
-            'account_no' => $data['account_no'],
-            'start_date' => $data['start_date'],
-            'end_date'   => $data['end_date'] ?? null,
-            'status'     => 'active',
-        ]);
-        // تحديث حالة اليتيم في جدول الأيتام
-        $orphan = Orphan::find($data['orphan_id']);
-        $orphan->is_sponsored = 1;       // تأكد أن العمود موجود في جدول orphans
-        $orphan->save();
-        return redirect()->route('sponsor.dashboard')
-                         ->with('success','تم تسجيل الكفالة بنجاح');
-    }
+    // تحديث حالة اليتيم للعرض في لوحة المدير
+    $orphan->is_sponsored = 1;
+    $orphan->save();
+
+    return redirect()->route('sponsor.dashboard')
+                     ->with('success','تم تسجيل الكفالة بنجاح');
+}
+
 
     public function show(Sponsorship $sponsorship)
     {

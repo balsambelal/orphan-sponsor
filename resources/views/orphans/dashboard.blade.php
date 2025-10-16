@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mt-4">
+<div class="container mt-4 mb-5">
     <h2 class="mb-4 text-center">لوحة تحكم اليتيم</h2>
 
     @if(session('success'))
@@ -16,21 +16,20 @@
         <div class="card-body row">
 
             {{-- صورة الطفل --}}
-<div class="col-md-4 d-flex justify-content-center align-items-start mb-3">
-    @php
-        $childImage = $orphan->child_image;
-        $childFullPath = $childImage && file_exists(storage_path('app/public/'.$childImage))
-            ? asset('storage/'.$childImage)
-            : 'https://via.placeholder.com/300x400?text=No+Image';
-    @endphp
-    <div style="width:100%; max-width:300px;">
-        <img src="{{ $childFullPath }}"
-             alt="صورة الطفل"
-             class="img-fluid rounded shadow-sm"
-             style="width:100%; height:auto; max-height:400px; object-fit:cover;">
-    </div>
-</div>
-
+            <div class="col-md-4 d-flex justify-content-center align-items-start mb-3">
+                @php
+                    $childImage = $orphan->child_image;
+                    $childFullPath = $childImage && file_exists(storage_path('app/public/'.$childImage))
+                        ? asset('storage/'.$childImage)
+                        : asset('images/default_orphan.png'); // الصورة الافتراضية
+                @endphp
+                <div style="width:100%; max-width:300px;">
+                    <img src="{{ $childFullPath }}"
+                         alt="صورة الطفل"
+                         class="img-fluid rounded shadow-sm"
+                         style="width:100%; height:auto; object-fit:cover;">
+                </div>
+            </div>
 
             {{-- بيانات اليتيم --}}
             <div class="col-md-8">
@@ -40,15 +39,20 @@
                     <tr><th>رقم الهوية:</th><td>{{ $orphan->identity_number }}</td></tr>
                     <tr><th>تاريخ الميلاد:</th><td>{{ $orphan->birthdate }}</td></tr>
                     <tr><th>الجنس:</th><td>{{ $orphan->gender }}</td></tr>
-                    <tr><th>الحساب البنكي:</th><td>{{ $orphan->bank_account ?? '-' }}</td></tr>
+                    <tr><th>اسم البنك:</th><td>{{ $orphan->bank_name ?? '-' }}</td></tr>
+                    <tr><th>رقم الحساب البنكي:</th><td>{{ $orphan->bank_account ?? '-' }}</td></tr>
+                    <tr><th>الدولة:</th><td>{{ $orphan->country ?? '-' }}</td></tr>
+                    <tr><th>المدينة:</th><td>{{ $orphan->city ?? '-' }}</td></tr>
+                    <tr><th>الحالة التعليمية:</th><td>{{ $orphan->education_status ?? '-' }}</td></tr>
                     <tr><th>العنوان:</th><td>{{ $orphan->address }}</td></tr>
                     <tr><th>حالة الكفالة:</th>
-                        <td>{{ $orphan->is_sponsored ? 'مكفول' : 'غير مكفول' }}</td></tr>
+                        <td>{{ $orphan->is_sponsored ? 'مكفول' : 'غير مكفول' }}</td>
+                    </tr>
                     <tr>
                         <th>قيمة الكفالة:</th>
                         <td>
-                            @if($sponsorship)
-                                {{ $sponsorship->amount }} دينار أردني
+                            @if($sponsorships->count() > 0)
+                                {{ $sponsorships->first()->amount }} دينار أردني
                             @else
                                 غير مكفول
                             @endif
@@ -104,9 +108,11 @@
     </div>
 
     {{-- الأزرار --}}
-    <div class="text-center mt-4">
+    <div class="text-center mt-4 pb-4">
         <a href="{{ route('orphans.edit', $orphan->id) }}" class="btn btn-warning mx-2">تعديل البيانات</a>
+        <a href="{{ route('orphans.sponsorships', $orphan->id) }}" class="btn btn-success mx-2">عرض الكفالات الخاصة بي</a>
         <a href="{{ route('orphans.list') }}" class="btn btn-info mx-2">تصفح الأيتام</a>
+
         <form action="{{ route('orphans.logout') }}" method="POST" class="d-inline">
             @csrf
             <button type="submit" class="btn btn-danger mx-2">تسجيل الخروج</button>
@@ -114,5 +120,4 @@
     </div>
 </div>
 @endsection
-
 

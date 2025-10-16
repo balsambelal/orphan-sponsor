@@ -8,12 +8,19 @@
         <div class="row g-3 align-items-start">
 
             {{-- صورة الطفل --}}
-            <div class="col-md-4 d-flex justify-content-center">
-                <div style="width:100%; max-width:250px;">
-                    <img src="{{ !empty($orphan->child_image) ? asset('storage/'.$orphan->child_image) : 'https://via.placeholder.com/300x400?text=No+Image' }}"
-                         alt="صورة الطفل"
-                         class="img-fluid rounded shadow-sm"
-                         style="width:100%; height:auto; max-height:350px; object-fit:cover;">
+            <div class="col-md-4 d-flex justify-content-center align-items-start mb-3">
+                @php
+                    $childImage = $orphan->child_image ?? null;
+                    $childFullPath = $childImage && file_exists(storage_path('app/public/'.$childImage))
+                        ? asset('storage/'.$childImage)
+                        : asset('images/default_orphan.png');
+                @endphp
+
+                <div style="width:100%; max-width:300px;">
+                    <img src="{{ $childFullPath }}"
+                    alt="صورة الطفل"
+                    class="img-fluid rounded shadow-sm"
+                    style="width:100%; height:auto; object-fit:cover;">
                 </div>
             </div>
 
@@ -26,10 +33,14 @@
                     <p class="mb-1"><strong>البريد الإلكتروني:</strong> {{ $orphan->email }}</p>
                     <p class="mb-1"><strong>رقم الهوية:</strong> {{ $orphan->identity_number }}</p>
                     <p class="mb-1"><strong>العنوان:</strong> {{ $orphan->address }}</p>
+                    <p class="mb-1"><strong>الدولة:</strong> {{ $orphan->country ?? '-' }}</p>
+                    <p class="mb-1"><strong>المدينة:</strong> {{ $orphan->city ?? '-' }}</p>
+                    <p class="mb-1"><strong>اسم البنك:</strong> {{ $orphan->bank_name ?? '-' }}</p>
                     <p class="mb-1"><strong>رقم الحساب البنكي:</strong> {{ $orphan->bank_account ?? '-' }}</p>
+                    <p class="mb-1"><strong>الحالة التعليمية:</strong> {{ $orphan->education_status ?? '-' }}</p>
                     <p class="mb-1"><strong>ملاحظات:</strong> {{ $orphan->notes ?? '-' }}</p>
 
-                    {{-- المستندات بشكل رأسي --}}
+                    {{-- المستندات --}}
                     <p class="mt-3 mb-2"><strong>المستندات:</strong></p>
                     <div class="d-flex flex-column gap-2">
                         @php
@@ -64,17 +75,26 @@
                         <div class="alert alert-danger mt-3">{{ session('error') }}</div>
                     @endif
 
-                    {{-- الأزرار --}}
-                    <div class="mt-3 d-flex flex-wrap gap-2">
+                    {{-- أزرار الكفالة والتحذيرات --}}
+                    @php
+                        $currentSponsor = auth()->guard('sponsor')->id();
+                        $alreadySponsoredByCurrent = $orphan->sponsors()->where('sponsor_id', $currentSponsor)->exists();
+                        $alreadySponsoredByOthers = $orphan->sponsors()->where('sponsor_id', '!=', $currentSponsor)->exists();
+                    @endphp
+
+                    <div class="mt-3 d-flex flex-wrap gap-2 align-items-center">
                         <a href="{{ route('sponsor.dashboard') }}" class="btn btn-secondary btn-sm">رجوع</a>
 
-                        @if($isSponsor)
-                            @if(!$orphan->isSponsored())
-                                <a href="{{ route('sponsor.sponsorship.create', $orphan->id) }}"
-                                   class="btn btn-success btn-sm">اكفلني</a>
-                            @else
-                                <span class="badge bg-success align-self-center">تم كفالة هذا اليتيم بالفعل</span>
-                            @endif
+                        {{-- زر الكفالة يظهر فقط إذا الكفيل لم يكفله مسبقًا --}}
+                        @if(!$alreadySponsoredByCurrent)
+                            <a href="{{ route('sponsor.sponsorship.create', $orphan->id) }}" class="btn btn-success btn-sm">اكفلني</a>
+                        @endif
+
+                        {{-- رسائل التحذير --}}
+                        @if($alreadySponsoredByCurrent)
+                            <span class="badge bg-success ms-2">لقد كفلت هذا اليتيم بالفعل</span>
+                        @elseif($alreadySponsoredByOthers)
+                            <span class="badge bg-warning ms-2">الطفل مكفول من كفيل آخر</span>
                         @endif
                     </div>
 
@@ -85,5 +105,22 @@
     </div>
 
 </div>
-@endsection
 
+{{-- تحسين المظهر --}}
+<style>
+    td .btn {
+        min-width: 120px;
+    }
+    td .btn-outline-info {
+        min-width: auto;
+    }
+    .btn-warning {
+        color: #fff;
+        font-weight: bold;
+    }
+    .img-review:hover {
+        transform: scale(1.5);
+        transition: transform 0.3s;
+    }
+</style>
+@endsection

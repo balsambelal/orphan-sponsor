@@ -22,6 +22,8 @@ return new class extends Migration
         $table->string('guardian_id')->nullable();
         $table->string('custody_document')->nullable();
         $table->timestamps();
+        $table->boolean('is_active')->default(true);
+
     });
 }
 

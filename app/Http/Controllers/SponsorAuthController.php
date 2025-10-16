@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Sponsor;
+
 
 class SponsorAuthController extends Controller
 {
@@ -13,23 +15,6 @@ class SponsorAuthController extends Controller
         return view('sponsors.login'); // تأكد من وجود هذا view
     }
 
-    //  تسجيل الدخول
-    public function login(Request $request)
-    {
-        $credentials = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
-
-        if (Auth::guard('sponsor')->attempt($credentials)) {
-            $request->session()->regenerate();
-            return redirect()->intended(route('sponsor.dashboard'));
-        }
-
-        return back()->withErrors([
-            'email' => 'بيانات الدخول غير صحيحة',
-        ]);
-    }
 
     //  تسجيل الخروج
     public function logout(Request $request)

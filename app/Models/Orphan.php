@@ -3,36 +3,93 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User as Authenticatable; 
-
+use Illuminate\Notifications\Notifiable;
 
 class Orphan extends Authenticatable
 {
-    use HasFactory;
+    use HasFactory, Notifiable;
 
-   protected $fillable = [
-    'name', 'birthdate', 'gender', 'address', 'identity_number', 'email', 'password',
- 'notes','is_sponsored', 'child_image', 'birth_certificate',
-    'death_certificate', 'guardian_id', 'custody_document',
-    'bank_account' 
-];
- protected $hidden = [
+    /**
+     * الحقول التي يمكن تعبئتها
+     */
+    protected $fillable = [
+        'name',
+        'birthdate',
+        'gender',
+        'address',
+        'identity_number',
+        'email',
+        'password',
+        'notes',
+        'child_image',
+        'birth_certificate',
+        'death_certificate',
+        'guardian_id',
+        'custody_document',
+        'bank_account',
+        'country',
+        'city',
+        'bank_name',
+        'education_status',
+        'is_sponsored',
+        'is_active', 
+        'is_verified',  
+
+
+    ];
+
+    /**
+     * الحقول التي يجب إخفاؤها عند الإخراج
+     */
+    protected $hidden = [
         'password',
         'remember_token',
     ];
 
-public function sponsorships()
+    /**
+     * الحقول المضافة تلقائيًا عند الإخراج
+     */
+    protected $appends = [
+        'is_sponsored',
+    ];
+// app/Models/Orphan.php
+
+public function sponsors()
+{
+    return $this->belongsToMany(Sponsor::class, 'sponsorships');
+}
+
+    /**
+     * العلاقة مع جدول الكفالات
+     */
+  public function sponsorships()
 {
     return $this->hasMany(Sponsorship::class);
 }
 
-// للتحقق إذا كان اليتيم مكفول
-public function isSponsored()
+
+    /**
+     * خاصية محسوبة لمعرفة إذا كان اليتيم مكفول
+     */
+    public function getIsSponsoredAttribute()
+    {
+        return $this->sponsorships()->exists();
+    }
+
+    /**
+     * تعديل كلمة المرور تلقائيًا إذا تم إدخالها
+     */
+public function setPasswordAttribute($value)
 {
-    return $this->sponsorships()->count() > 0;
+    if (!empty($value)) {
+        $this->attributes['password'] = bcrypt($value);
+    }
 }
 
 
+
+
 }
+
 
