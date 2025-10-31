@@ -1,3 +1,4 @@
+//محذوفة لا نحتاج اليها 
 @extends('layouts.app')
 @section('content')
 <div class="container">

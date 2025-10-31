@@ -45,48 +45,43 @@
             @csrf
             @method('PUT')
 
-            {{-- الاسم والبريد الإلكتروني ورقم الهوية --}}
+            {{-- الاسم، البريد الإلكتروني، الهوية، تاريخ الميلاد --}}
             <div class="row mb-3">
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label class="form-label">اسم اليتيم</label>
                     <input type="text" name="name" class="form-control" value="{{ old('name', $orphan->name) }}" required>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label class="form-label">البريد الإلكتروني</label>
                     <input type="email" name="email" class="form-control" value="{{ old('email', $orphan->email) }}" required>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label class="form-label">رقم الهوية</label>
                     <input type="text" name="identity_number" class="form-control" value="{{ old('identity_number', $orphan->identity_number) }}" required>
                 </div>
-            </div>
-
-            {{-- تاريخ الميلاد والجنس --}}
-            <div class="row mb-3">
-                <div class="col-md-6">
+                <div class="col-md-3">
                     <label class="form-label">تاريخ الميلاد</label>
                     <input type="date" name="birthdate" class="form-control" value="{{ old('birthdate', $orphan->birthdate) }}" required>
                 </div>
-                <div class="col-md-6">
+            </div>
+
+            {{-- الجنس، الدولة، المدينة، العنوان، الحالة التعليمية --}}
+            <div class="row mb-3">
+                <div class="col-md-2">
                     <label class="form-label">الجنس</label>
                     <select name="gender" class="form-select" required>
                         <option value="ذكر" {{ old('gender', $orphan->gender) == 'ذكر' ? 'selected' : '' }}>ذكر</option>
                         <option value="أنثى" {{ old('gender', $orphan->gender) == 'أنثى' ? 'selected' : '' }}>أنثى</option>
                     </select>
                 </div>
-            </div>
-
-            {{-- الدولة، المدينة، اسم البنك --}}
-            <div class="row mb-3">
-                <div class="col-md-4">
+                <div class="col-md-2">
                     <label class="form-label">الدولة</label>
                     <select name="country" class="form-select" required>
                         <option value="">اختر الدولة</option>
                         <option value="فلسطين" {{ old('country', $orphan->country) == 'فلسطين' ? 'selected' : '' }}>فلسطين</option>
                     </select>
                 </div>
-
-                <div class="col-md-4">
+                <div class="col-md-2">
                     <label class="form-label">المدينة</label>
                     <select name="city" class="form-select" id="city-select" required>
                         <option value="">اختر المدينة</option>
@@ -95,8 +90,28 @@
                         @endforeach
                     </select>
                 </div>
+                <div class="col-md-3">
+                    <label class="form-label">العنوان</label>
+                    <input type="text" name="address" class="form-control" value="{{ old('address', $orphan->address) }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">الحالة التعليمية</label>
+                    <select name="education_status" class="form-select" required>
+                        <option value="">اختر الحالة</option>
+                        @foreach(['طفل','طالب','خريج','غير ملتحق'] as $status)
+                            <option value="{{ $status }}" {{ old('education_status', $orphan->education_status) == $status ? 'selected' : '' }}>{{ $status }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
 
-                <div class="col-md-4">
+            {{-- رقم الحساب، اسم البنك، الملاحظات --}}
+            <div class="row mb-3">
+                <div class="col-md-3">
+                    <label class="form-label">رقم الحساب البنكي</label>
+                    <input type="text" name="bank_account" class="form-control" value="{{ old('bank_account', $orphan->bank_account) }}">
+                </div>
+                <div class="col-md-3">
                     <label class="form-label">اسم البنك</label>
                     <select name="bank_name" class="form-select" id="bank-select" required>
                         <option value="">اختر البنك</option>
@@ -110,52 +125,11 @@
                         @endif
                     </select>
                 </div>
-            </div>
-
-            {{-- رقم الحساب البنكي والحالة التعليمية --}}
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <label class="form-label">رقم الحساب البنكي</label>
-                    <input type="text" name="bank_account" class="form-control" value="{{ old('bank_account', $orphan->bank_account) }}">
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label">الحالة التعليمية</label>
-                    <select name="education_status" class="form-select" required>
-                        <option value="">اختر الحالة</option>
-                        @foreach(['طفل','طالب','خريج','غير ملتحق'] as $status)
-                            <option value="{{ $status }}" {{ old('education_status', $orphan->education_status) == $status ? 'selected' : '' }}>{{ $status }}</option>
-                        @endforeach
-                    </select>
-                </div>
-            </div>
-
-            {{-- العنوان والملاحظات --}}
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <label class="form-label">العنوان</label>
-                    <input type="text" name="address" class="form-control" value="{{ old('address', $orphan->address) }}">
-                </div>
                 <div class="col-md-6">
                     <label class="form-label">ملاحظات</label>
                     <textarea name="notes" class="form-control">{{ old('notes', $orphan->notes) }}</textarea>
                 </div>
             </div>
-
-            {{-- رفع الملفات --}}
-            @foreach(['child_image','birth_certificate','death_certificate','guardian_id','custody_document'] as $doc)
-                <div class="mb-3">
-                    <label class="form-label">{{ ucfirst(str_replace('_',' ',$doc)) }}</label>
-                    <input type="file" name="{{ $doc }}" class="form-control">
-                    @if(!empty($orphan->$doc))
-                        <p class="mt-2">
-                            <a href="{{ asset('storage/'.$orphan->$doc) }}" target="_blank">عرض الملف الحالي</a>
-                        </p>
-                        @if(str_contains($doc,'image'))
-                            <img src="{{ asset('storage/'.$orphan->$doc) }}" alt="{{ $doc }}" class="img-thumbnail" width="150">
-                        @endif
-                    @endif
-                </div>
-            @endforeach
 
             {{-- كلمة المرور --}}
             <div class="row mb-3">
@@ -169,9 +143,25 @@
                 </div>
             </div>
 
+            {{-- الصور والمستندات --}}
+            <div class="row mb-3">
+                @foreach(['child_image','birth_certificate','death_certificate','guardian_id','custody_document'] as $doc)
+                    <div class="col-md-2">
+                        <label class="form-label">{{ ucfirst(str_replace('_',' ',$doc)) }}</label>
+                        <input type="file" name="{{ $doc }}" class="form-control">
+                        @if(!empty($orphan->$doc))
+                            <a href="{{ asset('storage/'.$orphan->$doc) }}" target="_blank">عرض الملف</a>
+                        @endif
+                    </div>
+                @endforeach
+            </div>
+
             {{-- أزرار --}}
-            <button type="submit" class="btn btn-success">تحديث بيانات اليتيم</button>
-            <a href="{{ route('orphans.dashboard') }}" class="btn btn-secondary">رجوع</a>
+            <div class="mb-3">
+                <button type="submit" class="btn btn-success">تحديث بيانات اليتيم</button>
+                <a href="{{ route('orphans.dashboard') }}" class="btn btn-secondary">رجوع</a>
+            </div>
+
         </form>
     </div>
 </div>
@@ -196,4 +186,3 @@
     });
 </script>
 @endsection
-

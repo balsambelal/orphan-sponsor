@@ -1,4 +1,4 @@
-@extends('layouts.app')
+            @extends('layouts.app')
 
 @section('content')
 <div class="container" style="margin-top: 100px; max-width: 400px;">
@@ -8,6 +8,7 @@
         </div>
         <div class="card-body">
             @if(session('error'))
+            
                 <div class="alert alert-danger text-center">
                     {{ session('error') }}
                 </div>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Orphan;
 use App\Models\Sponsor;
+use App\Models\Sponsorship; // إضافة نموذج الكفالات
 use Illuminate\Support\Facades\Hash;
 
 class AdminController extends Controller
@@ -16,8 +17,9 @@ class AdminController extends Controller
     {
         $orphans = Orphan::with('sponsorships')->get();
         $sponsors = Sponsor::withCount('sponsorships')->get();
+        $sponsorships = Sponsorship::with(['orphan','sponsor'])->get(); // جلب الكفالات
 
-        return view('admin.dashboard', compact('orphans', 'sponsors'));
+        return view('admin.dashboard', compact('orphans', 'sponsors', 'sponsorships'));
     }
 
     /**
@@ -122,31 +124,28 @@ class AdminController extends Controller
     /**
      * إعادة تعيين كلمة مرور يتيم
      */
-public function forceResetOrphanPassword(Request $request, $id)
-{
-    $request->validate([
-        'password' => 'required|min:6|confirmed',
-    ]);
-
-    try {
-        $orphan = Orphan::findOrFail($id);
-
-        // Mutator في النموذج سيشفّر تلقائيًا
-        $orphan->password = $request->password;
-        $orphan->save();
-
-        return back()->with([
-            'password_success' => 'تم إعادة تعيين كلمة المرور بنجاح.',
-            'orphan_id' => $id
+    public function forceResetOrphanPassword(Request $request, $id)
+    {
+        $request->validate([
+            'password' => 'required|min:6|confirmed',
         ]);
-    } catch (\Exception $e) {
-        return back()->with([
-            'password_error' => 'فشل إعادة تعيين كلمة المرور: ' . $e->getMessage(),
-            'orphan_id' => $id
-        ]);
+
+        try {
+            $orphan = Orphan::findOrFail($id);
+            $orphan->password = $request->password; // Mutator في النموذج سيشفّر تلقائيًا
+            $orphan->save();
+
+            return back()->with([
+                'password_success' => 'تم إعادة تعيين كلمة المرور بنجاح.',
+                'orphan_id' => $id
+            ]);
+        } catch (\Exception $e) {
+            return back()->with([
+                'password_error' => 'فشل إعادة تعيين كلمة المرور: ' . $e->getMessage(),
+                'orphan_id' => $id
+            ]);
+        }
     }
-}
-
 
     /**
      * إعادة تعيين كلمة مرور كفيل
@@ -173,20 +172,19 @@ public function forceResetOrphanPassword(Request $request, $id)
             ]);
         }
     }
+
     public function deleteUser($type, $id)
-{
-    $model = $this->getModel($type, $id);
-    if (!$model) {
-        return back()->with('error', 'نوع المستخدم غير صالح.');
-    }
+    {
+        $model = $this->getModel($type, $id);
+        if (!$model) {
+            return back()->with('error', 'نوع المستخدم غير صالح.');
+        }
 
-    try {
-        $model->delete();
-        return back()->with('success', 'تم حذف المستخدم بنجاح.');
-    } catch (\Exception $e) {
-        return back()->with('error', 'فشل حذف المستخدم: ' . $e->getMessage());
+        try {
+            $model->delete();
+            return back()->with('success', 'تم حذف المستخدم بنجاح.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'فشل حذف المستخدم: ' . $e->getMessage());
+        }
     }
 }
-
-}
-

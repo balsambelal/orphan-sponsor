@@ -9,6 +9,7 @@ use App\Http\Controllers\SponsorshipController;
 use App\Http\Controllers\SponsorAuthController;
 use App\Http\Controllers\OrphanAuthController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\StatisticsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -45,6 +46,8 @@ Route::prefix('admin')->group(function () {
 });
 
 Route::get('/statistics', [OrphanController::class, 'statistics'])->name('statistics');
+Route::get('/statistics', [StatisticsController::class, 'index'])->name('statistics');
+
 
 // ================== Admin Protected Routes ==================
 Route::middleware(['auth:admin', 'is_admin'])->prefix('admin')->group(function () {
