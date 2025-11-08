@@ -264,56 +264,104 @@ td .btn-outline-info { min-width: auto; }
 .btn-warning { color: #fff; font-weight: bold; }
 </style>
 
-{{-- فلترة الجداول --}}
+{{-- فلترة الجداول + AJAX لتفعيل وتوثيق --}}
 <script>
-const filterSelect = document.getElementById('filterSection');
+document.addEventListener('DOMContentLoaded', function() {
+    const filterSelect = document.getElementById('filterSection');
 
-filterSelect.addEventListener('change', function() {
-    const selected = this.value;
-    document.querySelectorAll('.section-wrapper').forEach(section => {
-        section.style.display = (selected === 'all' || section.dataset.section === selected) ? 'block' : 'none';
-    });
-});
-
-// فلترة الأعمدة لكل جدول
-document.querySelectorAll('.table').forEach(table => {
-    const rows = Array.from(table.querySelectorAll('tbody tr'));
-
-    function applyFilters() {
-        const inputs = Array.from(table.querySelectorAll('.filter-input'));
-        const selects = Array.from(table.querySelectorAll('.filter-select'));
-
-        rows.forEach(row => {
-            let show = true;
-
-            // فلترة نصية لكل input
-            inputs.forEach(input => {
-                const col = input.dataset.col;
-                const value = input.value.trim().toLowerCase();
-                const td = row.cells[col];
-                if(td && !td.textContent.toLowerCase().includes(value)) show = false;
-            });
-
-            // فلترة select لكل select
-            selects.forEach(select => {
-                const col = select.dataset.col;
-                const val = select.value.trim().toLowerCase();
-                if(val) {
-                    const td = row.cells[col];
-                    if(td) {
-                        const span = td.querySelector('span');
-                        const text = span ? span.textContent.trim().toLowerCase() : td.textContent.trim().toLowerCase();
-                        if(text !== val) show = false;
-                    }
-                }
-            });
-
-            row.style.display = show ? '' : 'none';
+    filterSelect.addEventListener('change', function() {
+        const selected = this.value;
+        document.querySelectorAll('.section-wrapper').forEach(section => {
+            section.style.display = (selected === 'all' || section.dataset.section === selected) ? 'block' : 'none';
         });
+    });
+
+    // فلترة الأعمدة
+    document.querySelectorAll('.table').forEach(table => {
+        const rows = Array.from(table.querySelectorAll('tbody tr'));
+
+        function applyFilters() {
+            const inputs = Array.from(table.querySelectorAll('.filter-input'));
+            const selects = Array.from(table.querySelectorAll('.filter-select'));
+
+            rows.forEach(row => {
+                let show = true;
+
+                inputs.forEach(input => {
+                    const col = input.dataset.col;
+                    const value = input.value.trim().toLowerCase();
+                    const td = row.cells[col];
+                    if(td && !td.textContent.toLowerCase().includes(value)) show = false;
+                });
+
+                selects.forEach(select => {
+                    const col = select.dataset.col;
+                    const val = select.value.trim().toLowerCase();
+                    if(val) {
+                        const td = row.cells[col];
+                        if(td) {
+                            const span = td.querySelector('span');
+                            const text = span ? span.textContent.trim().toLowerCase() : td.textContent.trim().toLowerCase();
+                            if(text !== val) show = false;
+                        }
+                    }
+                });
+
+                row.style.display = show ? '' : 'none';
+            });
+        }
+
+        table.querySelectorAll('.filter-input').forEach(i => i.addEventListener('keyup', applyFilters));
+        table.querySelectorAll('.filter-select').forEach(s => s.addEventListener('change', applyFilters));
+    });
+
+    // ==================== AJAX لتفعيل/توثيق ====================
+    function ajaxToggle(url, callback) {
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(res => res.json())
+        .then(callback)
+        .catch(err => alert('حدث خطأ: ' + err));
     }
 
-    table.querySelectorAll('.filter-input').forEach(i => i.addEventListener('keyup', applyFilters));
-    table.querySelectorAll('.filter-select').forEach(s => s.addEventListener('change', applyFilters));
+    // تفعيل/إلغاء التفعيل
+    document.querySelectorAll('.toggle-status-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const type = this.dataset.type;
+            const id = this.dataset.id;
+            ajaxToggle(`/admin/toggle-status/${type}/${id}`, (res) => {
+                if(res.status === 'success') {
+                    const badge = document.getElementById(`status-${type}-${id}`);
+                    badge.textContent = res.is_active ? 'مفعل' : 'معطل';
+                    badge.className = 'badge ' + (res.is_active ? 'bg-success' : 'bg-danger');
+                    btn.textContent = res.is_active ? 'إلغاء التفعيل' : 'تفعيل';
+                    btn.className = 'btn btn-sm ' + (res.is_active ? 'btn-danger' : 'btn-success');
+                } else alert(res.message);
+            });
+        });
+    });
+
+    // توثيق/إلغاء التوثيق
+    document.querySelectorAll('.toggle-verify-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const type = this.dataset.type;
+            const id = this.dataset.id;
+            ajaxToggle(`/admin/toggle-verify/${type}/${id}`, (res) => {
+                if(res.status === 'success') {
+                    const badge = document.getElementById(`verify-${type}-${id}`);
+                    badge.textContent = res.is_verified ? 'تم التحقق' : 'لم يتم التحقق';
+                    badge.className = 'badge ' + (res.is_verified ? 'bg-success' : 'bg-secondary');
+                    btn.textContent = res.is_verified ? 'إلغاء التحقق' : 'توثيق البيانات';
+                } else alert(res.message);
+            });
+        });
+    });
 });
 </script>
 @endsection
+
