@@ -21,6 +21,18 @@ use App\Http\Controllers\StatisticsController;
 Route::get('/', function () {
     return view('welcome');
 })->name('home');
+Route::get('/about', function () {
+    return view('about'); // يجب أن تنشئ ملف resources/views/about.blade.php
+})->name('about');
+
+Route::get('/terms', function () {
+    return view('terms'); // ملف terms.blade.php
+})->name('terms');
+
+Route::get('/contact', function () {
+    return view('contact'); // ملف contact.blade.php
+})->name('contact');
+
 
 // ================== Admin Authentication ==================
 Route::prefix('admin')->group(function () {

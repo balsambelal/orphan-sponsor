@@ -19,6 +19,7 @@ class SponsorController extends Controller
     public function edit()
     {
         $sponsor = Auth::guard('sponsor')->user();
+       // dd($sponsor->toArray());
         return view('sponsors.edit', compact('sponsor'));
     }
 

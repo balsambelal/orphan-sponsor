@@ -9,7 +9,7 @@
         background-position: center;
         background-repeat: no-repeat;
         font-family: Arial, sans-serif;
-        overflow-y: auto; /* ✅ تم تعديلها لتفعيل السكرول */
+        overflow-y: auto;
     }
 
     .overlay {
@@ -29,17 +29,14 @@
 
     .main-sections {
         display: flex;
-        justify-content: center;
-        align-items: flex-start;
-        flex-wrap: wrap;
-        gap: 20px;
-        margin: 10px auto;
+        flex-direction: column;
+        gap: 25px;
+        margin: 20px auto;
         max-width: 1400px;
         padding: 10px 20px;
     }
 
     .section {
-        flex: 1 1 700px;
         padding: 25px 20px;
         background-color: rgba(255, 255, 255, 0.95);
         border-radius: 15px;
@@ -61,6 +58,7 @@
         box-shadow: 0 2px 8px rgba(0,0,0,0.15);
         text-align: center;
         transition: transform 0.3s ease;
+        margin-bottom: 20px;
     }
 
     .activity-card:hover {
@@ -104,43 +102,36 @@
         background-color: #bf360c;
     }
 
-    /* ===== تنسيق عرض الأنشطة + القصة بجانب بعض ===== */
-    .activities-story {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 20px;
-        align-items: stretch;
-        justify-content: center;
-    }
-
-    .activities {
-        flex: 1 1 55%;
-    }
-
     .story-section {
-        flex: 1 1 40%;
         background-color: rgba(255, 255, 255, 0.95);
         border-radius: 15px;
         box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         padding: 25px;
-    }
-
-    .story-title {
-        text-align: center;
-        color: #d84315;
-        font-size: 26px;
-        margin-bottom: 20px;
-        font-weight: bold;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 20px;
     }
 
     .story-image {
-        background-image: url('/images/images.jpg');
+        flex: 1 1 300px;
+        height: 220px;
         background-size: cover;
         background-position: center;
         border-radius: 12px;
-        height: 220px;
+        filter: grayscale(0%);
+    }
+
+    .story-content {
+        flex: 2 1 400px;
+    }
+
+    .story-title {
+        color: #d84315;
+        font-size: 26px;
         margin-bottom: 15px;
-        filter: grayscale(100%);
+        font-weight: bold;
+        text-align: center;
     }
 
     .story-text {
@@ -151,12 +142,18 @@
     }
 
     @media (max-width: 991px) {
-        .activities-story {
+        .story-section {
             flex-direction: column;
         }
-
         .story-image {
+            width: 100%;
             height: 200px;
+        }
+        .story-content {
+            width: 100%;
+        }
+        .story-title {
+            text-align: center;
         }
     }
 </style>
@@ -172,48 +169,80 @@
 </div>
 
 <div class="main-sections">
-    <div class="section container">
-        <h2>أنشطة المشروع </h2>
-
-        <div class="activities-story">
-            {{-- قسم الأنشطة --}}
-            <div class="activities">
-                <div class="row g-4">
-                    <div class="col-md-12">
-                        <div class="activity-card">
-                            <img src="{{ asset('images/activity1.png') }}" alt="كفالة الأيتام" class="img-fluid mb-3" style="height:130px;">
-                            <h4>كفالة الأيتام</h4>
-                            <p>نوفر دعمًا ماليًا ومعنويًا للأطفال الأيتام لضمان تعليمهم وحياتهم الكريمة.</p>
-                        </div>
-                    </div>
-                    <div class="col-md-12">
-                        <div class="activity-card">
-                            <img src="{{ asset('images/activity2.png') }}" alt="التعليم والدعم النفسي" class="img-fluid mb-3" style="height:130px;">
-                            <h4>التعليم والدعم النفسي</h4>
-                            <p>نوفر برامج تعليمية ودورات تدريبية، بالإضافة إلى جلسات دعم نفسي للأطفال الأيتام.</p>
-                        </div>
-                    </div>
-                    <div class="col-md-12">
-                        <div class="activity-card">
-                            <img src="{{ asset('images/activity3.png') }}" alt="التكافل المجتمعي" class="img-fluid mb-3" style="height:130px;">
-                            <h4>التكافل المجتمعي</h4>
-                            <p>نشجع المجتمع على المشاركة والمساهمة في تحسين حياة الأيتام من خلال الحملات والمبادرات.</p>
-                        </div>
-                    </div>
-                </div>
+    {{-- أنشطة المشروع --}}
+    {{-- أنشطة المشروع --}}
+<div class="section">
+    <h2>أنشطة المشروع</h2>
+    <div class="row g-4 justify-content-center">
+        <div class="col-lg-4 col-md-6 col-sm-12">
+            <div class="activity-card text-center">
+                <img src="{{ asset('images/activity1.png') }}" alt="كفالة الأيتام" class="img-fluid mb-3" style="height:130px;">
+                <h4> 🏠❤️ كفالة الأيتام</h4>
+                <p>نوفر دعمًا ماليًا ومعنويًا للأطفال الأيتام لضمان تعليمهم وحياتهم الكريمة.</p>
             </div>
-
-            {{-- قسم قصة اليتيم --}}
-            <div class="story-section">
-                <h1 class="story-title">قصة الطفل اليتيم</h1>
-                <div class="story-image"></div>
-                <p class="story-text">
-                    كل طفل يتيم يحمل قصة مؤثرة، قصة فقدان الأمان والحب.
-                    هدفنا في هذا المشروع أن نكون يدًا تمتد لهؤلاء الأطفال،
-                    لنمنحهم الأمل ونبني لهم مستقبلًا أفضل، مليئًا بالعطاء والرعاية.
-                </p>
+        </div>
+        <div class="col-lg-4 col-md-6 col-sm-12">
+            <div class="activity-card text-center">
+                <img src="{{ asset('images/activity2.png') }}" alt="التعليم والدعم النفسي" class="img-fluid mb-3" style="height:130px;">
+                <h4> ✏️📚 التعليم والدعم النفسي </h4>
+                <p>نوفر برامج تعليمية ودورات تدريبية، بالإضافة إلى جلسات دعم نفسي للأطفال الأيتام.</p>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-6 col-sm-12">
+            <div class="activity-card text-center">
+                <img src="{{ asset('images/activity3.png') }}" alt="التكافل المجتمعي" class="img-fluid mb-3" style="height:130px;">
+                <h4>🤝🫂التكافل المجتمعي</h4>
+                <p>نشجع المجتمع على المشاركة والمساهمة في تحسين حياة الأيتام من خلال الحملات والمبادرات.</p>
             </div>
         </div>
     </div>
+</div>
+
+
+   {{-- قصة الطفل اليتيم --}}
+<div class="story-section">
+    <div class="story-image" style="background-image: url('{{ asset('images/orphan_story.jpg') }}');"></div>
+    <div class="story-content">
+        <h2 class="story-title">قصة الطفل اليتيم</h2>
+        <p class="story-text" style="font-weight:bold; color:#d84315; font-size:18px; margin-bottom:15px;">
+            "كنت خائفًا من المستقبل، حتى جاء من يؤمن بي."
+        </p>
+        <p class="story-text">
+            آدم، أحد أطفال مشروع رعاية، بدأ حياته مليئة بالتحديات بعد فقدان والده.  
+            بفضل الكفالة والدعم النفسي والتعليم، أصبح لديه أمل وحياة أفضل.  
+            مشروع رعاية يغير حياة الأطفال خطوة بخطوة، ليمنحهم الأمان والتعليم والفرصة لبناء مستقبل مشرق.
+        </p>
+    </div>
+</div>
+
+{{-- قصة الكفيل --}}
+<div class="story-section">
+    <div class="story-image" style="background-image: url('{{ asset('images/sponsor_story.jpg') }}');"></div>
+    <div class="story-content">
+        <h2 class="story-title">قصة الكفيل</h2>
+        <p class="story-text">
+             الشكر لكفلاء رعاية الذين حملوا رسالة العطاء على عاتقهم، وساهموا في تغيير حياة الأطفال الأيتام. 
+            من خلال دعمهم المستمر، أصبح للأطفال فرصة للتعلم والنمو في بيئة آمنة، واكتساب مهارات الحياة، 
+            وبناء مستقبل مشرق مليء بالأمل والطموح. كل كفيل هنا يترك بصمة إيجابية لا تُنسى في حياة طفل محتاج.
+        </p>
+    </div>
+</div>
+
+{{-- قالوا عنا --}}
+<div class="story-section">
+    <div class="story-content">
+        <h2 class="story-title">قالوا عنا</h2>
+        <p class="story-text">
+            "بفضل مشروع رعاية، شعرت بالأمان والأمل من جديد. لقد أعادوا لي الفرحة التي فقدتها، وأكدوا لي أن هناك من يهتم بي."    <br><br>
+            
+            "الكفالة هنا ليست مجرد دعم مالي، بل فرصة حقيقية لتغيير حياة طفل. رؤية طفولي يبتسمون كل يوم هي أعظم مكافأة يمكن أن أحصل عليها."   <br><br>
+            
+            "فريق العمل ملتزم ومخلص، يجعل العطاء رحلة ممتعة وملهمة. شعرت أن مساهمتي تُحدث فرقًا حقيقيًا في حياة الأطفال."   <br><br>
+            
+            "كل يوم نرى قصص نجاح جديدة، أطفال يتعلمون وينمون، ويشعرون بالأمل. هذا المشروع حقًا يزرع الحب والعطاء في كل قلب."   
+        </p>
+    </div>
+</div>
+
 </div>
 @endsection

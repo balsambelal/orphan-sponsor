@@ -1,10 +1,10 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container py-3"><!-- قللنا المسافة الرأسية العامة من py-4 إلى py-3 -->
+<div class="container py-3">
 
     {{-- رأس الصفحة --}}
-    <div class="d-flex justify-content-between align-items-center mb-2 mt-2"><!-- قللنا المسافة من mb-4 إلى mb-2 -->
+    <div class="d-flex justify-content-between align-items-center mb-2 mt-2">
         <h1 class="fw-bold text-center flex-grow-1" style="margin-top: 0.5rem; margin-bottom: 0.5rem;">لوحة تحكم المدير</h1>
     </div>
 
@@ -24,7 +24,7 @@
     @endphp
 
     {{-- البحث العام --}}
-    <div class="mb-2 d-flex justify-content-center"><!-- قللنا المسافة من mb-3 إلى mb-2 -->
+    <div class="mb-2 d-flex justify-content-center">
         <label for="filterSection" class="fw-bold me-2 align-self-center" style="font-size:1.4rem; color:#000;">بحث:</label>
         <select id="filterSection" class="form-select text-center" style="width:230px; font-size:1.05rem; padding:0.3rem 0.6rem;">
             <option value="all" selected>عرض الكل</option>
@@ -54,6 +54,35 @@
                             <th>الحالة</th>
                             <th>توثيق البيانات</th>
                             <th>الإجراءات</th>
+                        @endif
+                    </tr>
+
+                    {{-- صف الفلاتر لكل عمود --}}
+                    <tr class="table-light">
+                        @if($section['type'] == 'sponsorship')
+                            <th><input type="text" class="form-control form-control-sm filter-input" placeholder="بحث عن اليتيم" data-col="0"></th>
+                            <th><input type="text" class="form-control form-control-sm filter-input" placeholder="بحث عن الكفيل" data-col="1"></th>
+                            <th><input type="text" class="form-control form-control-sm filter-input" placeholder="بحث عن المبلغ" data-col="2"></th>
+                            <th><input type="text" class="form-control form-control-sm filter-input" placeholder="بحث عن تاريخ البداية" data-col="3"></th>
+                            <th><input type="text" class="form-control form-control-sm filter-input" placeholder="بحث عن تاريخ النهاية" data-col="4"></th>
+                        @else
+                            <th><input type="text" class="form-control form-control-sm filter-input" placeholder="بحث عن الاسم" data-col="0"></th>
+                            <th></th>
+                            <th>
+                                <select class="form-select form-select-sm filter-select" data-col="2">
+                                    <option value="">الحالة: الكل</option>
+                                    <option value="مفعل">مفعل</option>
+                                    <option value="معطل">معطل</option>
+                                </select>
+                            </th>
+                            <th>
+                                <select class="form-select form-select-sm filter-select" data-col="3">
+                                    <option value="">توثيق البيانات: الكل</option>
+                                    <option value="تم التحقق">تم التحقق</option>
+                                    <option value="لم يتم التحقق">لم يتم التحقق</option>
+                                </select>
+                            </th>
+                            <th></th>
                         @endif
                     </tr>
                 </thead>
@@ -119,7 +148,7 @@
             </table>
         </div>
 
-        {{-- مودالات للأيتام والكفلاء --}}
+        {{-- مودالات الأيتام والكفلاء --}}
         @if($section['type'] != 'sponsorship')
             @foreach($section['data'] as $item)
                 <div class="modal fade" id="modal{{ $section['type'] }}{{ $item->id }}" tabindex="-1" aria-hidden="true">
@@ -235,7 +264,7 @@ td .btn-outline-info { min-width: auto; }
 .btn-warning { color: #fff; font-weight: bold; }
 </style>
 
-{{-- بحث الجداول --}}
+{{-- فلترة الجداول --}}
 <script>
 const filterSelect = document.getElementById('filterSection');
 
@@ -244,7 +273,47 @@ filterSelect.addEventListener('change', function() {
     document.querySelectorAll('.section-wrapper').forEach(section => {
         section.style.display = (selected === 'all' || section.dataset.section === selected) ? 'block' : 'none';
     });
-    this.querySelectorAll('option').forEach(opt => opt.selected = (opt.value === selected));
+});
+
+// فلترة الأعمدة لكل جدول
+document.querySelectorAll('.table').forEach(table => {
+    const rows = Array.from(table.querySelectorAll('tbody tr'));
+
+    function applyFilters() {
+        const inputs = Array.from(table.querySelectorAll('.filter-input'));
+        const selects = Array.from(table.querySelectorAll('.filter-select'));
+
+        rows.forEach(row => {
+            let show = true;
+
+            // فلترة نصية لكل input
+            inputs.forEach(input => {
+                const col = input.dataset.col;
+                const value = input.value.trim().toLowerCase();
+                const td = row.cells[col];
+                if(td && !td.textContent.toLowerCase().includes(value)) show = false;
+            });
+
+            // فلترة select لكل select
+            selects.forEach(select => {
+                const col = select.dataset.col;
+                const val = select.value.trim().toLowerCase();
+                if(val) {
+                    const td = row.cells[col];
+                    if(td) {
+                        const span = td.querySelector('span');
+                        const text = span ? span.textContent.trim().toLowerCase() : td.textContent.trim().toLowerCase();
+                        if(text !== val) show = false;
+                    }
+                }
+            });
+
+            row.style.display = show ? '' : 'none';
+        });
+    }
+
+    table.querySelectorAll('.filter-input').forEach(i => i.addEventListener('keyup', applyFilters));
+    table.querySelectorAll('.filter-select').forEach(s => s.addEventListener('change', applyFilters));
 });
 </script>
 @endsection
