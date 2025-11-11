@@ -13,20 +13,20 @@
     </div>
 
     {{-- جدول الأيتام مع فلتر البحث --}}
-    <table class="table table-bordered mt-2">
-        <thead class="table-light">
-            <tr>
-                <th>الاسم</th>
-                <th>العمر</th>
-                <th>الجنس</th>
-                <th>العنوان</th>
-                <th>حالة الكفالة</th>
-                <th>الإجراءات</th>
-            </tr>
+    <form method="GET" action="{{ route('sponsor.dashboard') }}">
+        <table class="table table-bordered mt-2">
+            <thead class="table-light">
+                <tr>
+                    <th>الاسم</th>
+                    <th>العمر</th>
+                    <th>الجنس</th>
+                    <th>العنوان</th>
+                    <th>حالة الكفالة</th>
+                    <th>الإجراءات</th>
+                </tr>
 
-            {{-- فلتر البحث داخل الجدول --}}
-            <tr>
-                <form method="GET" action="{{ route('sponsor.dashboard') }}">
+                {{-- فلتر البحث داخل الجدول --}}
+                <tr>
                     <th>
                         <input type="text" name="name" class="form-control form-control-sm" placeholder="ابحث باسم اليتيم" value="{{ request('name') }}">
                     </th>
@@ -70,43 +70,60 @@
                     <th>
                         <button type="submit" class="btn btn-primary btn-sm w-100">بحث</button>
                     </th>
-                </form>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($orphans as $orphan)
-                @php
-                    $orphanAge = \Carbon\Carbon::parse($orphan->birthdate)->age ?? null;
-                    $ageFrom = request('age_from');
-                    $ageTo = request('age_to');
-                    $genderFilter = request('gender');
-                    
-                    $show = true;
-                    if ($ageFrom !== null && $ageFrom !== '' && $orphanAge < $ageFrom) $show = false;
-                    if ($ageTo !== null && $ageTo !== '' && $orphanAge > $ageTo) $show = false;
-                    if ($genderFilter && $orphan->gender != $genderFilter) $show = false;
-                @endphp
-
-                @if($show)
-                <tr>
-                    <td>{{ $orphan->name }}</td>
-                    <td>{{ $orphanAge ?? '-' }}</td>
-                    <td>{{ $orphan->gender }}</td>
-                    <td>{{ $orphan->address }}</td>
-                    <td>
-                        @if($orphan->sponsorships->count() > 0)
-                            <span class="badge bg-success">مكفول</span>
-                        @else
-                            <span class="badge bg-secondary">غير مكفول</span>
-                        @endif
-                    </td>
-                    <td>
-                        <a href="{{ route('sponsor.orphan.show', $orphan->id) }}" class="btn btn-info btn-sm">عرض التفاصيل</a>
-                    </td>
                 </tr>
-                @endif
-            @endforeach
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach($orphans as $orphan)
+                    @php
+                        $orphanAge = \Carbon\Carbon::parse($orphan->birthdate)->age ?? null;
+                        $show = true;
+
+                        // فلترة الاسم
+                        $nameFilter = request('name');
+                        if ($nameFilter && stripos($orphan->name, $nameFilter) === false) $show = false;
+
+                        // فلترة العمر
+                        $ageFrom = request('age_from');
+                        $ageTo = request('age_to');
+                        if ($ageFrom && $orphanAge < $ageFrom) $show = false;
+                        if ($ageTo && $orphanAge > $ageTo) $show = false;
+
+                        // فلترة الجنس
+                        $genderFilter = request('gender');
+                        if ($genderFilter && $orphan->gender != $genderFilter) $show = false;
+
+                        // فلترة المدينة
+                        $cityFilter = request('city');
+                        if ($cityFilter && $orphan->city != $cityFilter) $show = false;
+
+                        // فلترة حالة الكفالة
+                        $statusFilter = request('sponsorship_status');
+                        $hasSponsorship = $orphan->sponsorships->count() > 0;
+                        if ($statusFilter == 'sponsored' && !$hasSponsorship) $show = false;
+                        if ($statusFilter == 'unsponsored' && $hasSponsorship) $show = false;
+                    @endphp
+
+                    @if($show)
+                    <tr>
+                        <td>{{ $orphan->name }}</td>
+                        <td>{{ $orphanAge ?? '-' }}</td>
+                        <td>{{ $orphan->gender }}</td>
+                        <td>{{ $orphan->city ?? $orphan->address }}</td>
+                        <td>
+                            @if($hasSponsorship)
+                                <span class="badge bg-success">مكفول</span>
+                            @else
+                                <span class="badge bg-secondary">غير مكفول</span>
+                            @endif
+                        </td>
+                        <td>
+                            <a href="{{ route('sponsor.orphan.show', $orphan->id) }}" class="btn btn-info btn-sm">عرض التفاصيل</a>
+                        </td>
+                    </tr>
+                    @endif
+                @endforeach
+            </tbody>
+        </table>
+    </form>
 </div>
 @endsection
